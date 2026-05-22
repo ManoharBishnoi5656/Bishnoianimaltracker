@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bishnoi Animal Tracker</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+background:#f3f4f6;
+overflow-x:hidden;
+}
+
+.menu{
+display:none;
+}
+
+.menu.active{
+display:block;
+}
+
+@keyframes run{
+
+0%{
+left:-250px;
+}
+
+100%{
+left:120%;
+}
+
+}
+
+@keyframes lion{
+
+0%{
+left:-450px;
+}
+
+100%{
+left:120%;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="app"></div>
+
+<script>
+
+// ================= VARIABLES =================
+
+let page="home";
+let role="";
+let currentVisitor=null;
+let menuOpen=false;
+let editingAnimalId=null;
+
+// ================= STORAGE =================
+
+let animals=[];
+
+try{
+
+const savedAnimals=localStorage.getItem("animals");
+
+if(savedAnimals){
+
+animals=JSON.parse(savedAnimals);
+
+}else{
+
+animals=[];
+
+}
+
+}catch(error){
+
+animals=[];
+
+}
+
+// ================= SAVE =================
+
+function saveAnimals(){
+
+localStorage.setItem(
+"animals",
+JSON.stringify(animals)
+);
+
+}
+
+// ================= RENDER =================
+
+function render(){
+
+const app=document.getElementById("app");
+
+// ================= HOME =================
+
+if(page==="home"){
+
+app.innerHTML=`
+
+<div class="relative min-h-screen overflow-hidden bg-black">
+
+<!-- VIDEO -->
+
+<video
+autoplay
+muted
+loop
+playsinline
+class="absolute w-full h-full object-cover opacity-70">
+
+<source src="https://cdn.coverr.co/videos/coverr-lion-in-the-wild-1560678667428?download=1080p" type="video/mp4">
+
+</video>
+
+<!-- OVERLAY -->
+
+<div class="absolute inset-0 bg-black/60"></div>
+
+<!-- CONTENT -->
+
+<div class="relative z-10 min-h-screen flex flex-col items-center justify-center text-center p-6">
+
+<h1 class="text-6xl md:text-7xl font-bold text-white mb-6">
+
+Bishnoi Animal Tracker
+
+</h1>
+
+<p class="text-2xl text-green-200 mb-10 max-w-3xl">
+
+Protecting Wildlife • Saving Blackbucks • Tracking Nature
+
+</p>
+
+<!-- RUNNING BLACKBUCK -->
+
+<div class="relative w-full h-44 overflow-hidden mb-10">
+
+<div class="absolute left-[-250px] animate-[run_8s_linear_infinite]">
+
+<img
+src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Blackbuck.jpg"
+class="h-40 w-60 object-cover rounded-3xl border-4 border-white shadow-2xl"
+/>
+
+</div>
+
+<!-- LION -->
+
+<div class="absolute left-[-450px] top-12 animate-[lion_8s_linear_infinite]">
+
+<img
+src="https://upload.wikimedia.org/wikipedia/commons/7/73/Lion_waiting_in_Namibia.jpg"
+class="h-32 w-48 object-cover rounded-3xl border-4 border-yellow-300 shadow-2xl"
+/>
+
+</div>
+
+</div>
+
+<button
+onclick="goLogin()"
+class="bg-green-700 hover:bg-green-800 text-white px-12 py-5 rounded-3xl text-2xl shadow-2xl">
+
+Enter Website
+
+</button>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+// ================= SIGNUP =================
+
+else if(page==="signin"){
+
+app.innerHTML=`
+
+<div class="min-h-screen flex items-center justify-center bg-green-100 p-6">
+
+<div class="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-md">
+
+<h2 class="text-4xl font-bold text-center text-green-700 mb-6">
+Visitor Sign Up
+</h2>
+
+<input id="signupUsername"
+placeholder="Username"
+class="w-full border p-4 rounded-2xl mb-4"/>
+
+<input id="signupEmail"
+type="email"
+placeholder="Email"
+class="w-full border p-4 rounded-2xl mb-4"/>
+
+<input id="signupPassword"
+type="password"
+placeholder="Password"
+class="w-full border p-4 rounded-2xl mb-4"/>
+
+<input id="signupConfirmPassword"
+type="password"
+placeholder="Confirm Password"
+class="w-full border p-4 rounded-2xl mb-6"/>
+
+<button onclick="createVisitorAccount()"
+class="w-full bg-green-700 text-white py-4 rounded-2xl">
+Create Account
+</button>
+
+<button onclick="goHome()"
+class="w-full mt-4 bg-gray-500 text-white py-4 rounded-2xl">
+Back
+</button>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+// ================= LOGIN =================
+
+else if(page==="login"){
+
+app.innerHTML=`
+
+<div class="min-h-screen flex items-center justify-center bg-gray-100 p-6">
+
+<div class="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-5xl">
+
+<h2 class="text-4xl font-bold text-center text-green-700 mb-10">
+Login Panel
+</h2>
+
+<div class="grid md:grid-cols-2 gap-8">
+
+<!-- OWNER -->
+
+<div class="bg-green-50 border-2 border-green-300 p-8 rounded-3xl">
+
+<h3 class="text-3xl font-bold text-green-700 mb-6">
+Owner Login
+</h3>
+
+<input id="ownerUser"
+placeholder="Owner Username"
+class="w-full border p-4 rounded-2xl mb-4"/>
+
+<input id="ownerPass"
+type="password"
+placeholder="Owner Password"
+class="w-full border p-4 rounded-2xl mb-6"/>
+
+<button onclick="ownerLogin()"
+class="w-full bg-green-700 text-white py-4 rounded-2xl">
+Login As Owner
+</button>
+
+</div>
+
+<!-- VISITOR -->
+
+<div class="bg-gray-50 border-2 border-gray-300 p-8 rounded-3xl">
+
+<h3 class="text-3xl font-bold text-gray-800 mb-6">
+Visitor Login
+</h3>
+
+<input id="visitorUser"
+placeholder="Visitor Username"
+class="w-full border p-4 rounded-2xl mb-4"/>
+
+<input id="visitorPass"
+type="password"
+placeholder="Visitor Password"
+class="w-full border p-4 rounded-2xl mb-6"/>
+
+<button onclick="visitorLogin()"
+class="w-full bg-black text-white py-4 rounded-2xl">
+Login As Visitor
+</button>
+
+</div>
+
+</div>
+
+<div class="mt-6">
+
+<button onclick="goSignIn()"
+class="w-full bg-blue-600 text-white py-4 rounded-2xl mb-4">
+
+Create Visitor Account
+
+</button>
+
+<button onclick="goHome()"
+class="w-full bg-gray-500 text-white py-4 rounded-2xl">
+
+Back
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+// ================= DASHBOARD =================
+
+else if(page==="dashboard"){
+
+app.innerHTML=`
+
+<div class="min-h-screen">
+
+<header class="bg-green-700 text-white p-5 flex justify-between items-center relative">
+
+<h1 class="text-3xl font-bold">
+Bishnoi Animal Tracker
+</h1>
+
+<div class="flex gap-3">
+
+<button onclick="toggleMenu()"
+class="bg-white text-black px-4 py-2 rounded-xl">
+☰
+</button>
+
+<button onclick="logout()"
+class="bg-red-500 px-5 py-3 rounded-2xl">
+Logout
+</button>
+
+</div>
+
+<!-- MENU -->
+
+<div id="menuBox"
+class="menu absolute top-20 right-5 bg-white text-black rounded-2xl shadow-2xl p-6 w-80 z-50">
+
+${role==="visitor" ? `
+
+<h2 class="text-2xl font-bold mb-4">
+My Profile
+</h2>
+
+<p class="mb-2">
+<b>Username:</b> ${currentVisitor.username}
+</p>
+
+<p class="mb-4">
+<b>Email:</b> ${currentVisitor.email}
+</p>
+
+<input id="oldPassword"
+type="password"
+placeholder="Old Password"
+class="w-full border p-3 rounded-xl mb-3"/>
+
+<input id="newPassword"
+type="password"
+placeholder="New Password"
+class="w-full border p-3 rounded-xl mb-3"/>
+
+<button onclick="changePassword()"
+class="w-full bg-green-700 text-white py-3 rounded-xl">
+Change Password
+</button>
+
+` : `
+
+<h2 class="text-2xl font-bold mb-4">
+Visitor Details
+</h2>
+
+<div class="max-h-96 overflow-auto">
+${getVisitorsHTML()}
+</div>
+
+`}
+
+</div>
+
+</header>
+
+<main class="p-6">
+
+<!-- SEARCH -->
+
+<div class="bg-white p-4 rounded-3xl shadow-lg mb-8">
+
+<input
+type="text"
+placeholder="Search animal by name..."
+oninput="searchAnimal(this.value)"
+class="w-full border p-4 rounded-2xl text-lg"
+/>
+
+</div>
+
+<!-- OWNER PANEL -->
+
+${role==="owner" ? `
+
+<div class="bg-white p-8 rounded-3xl shadow-xl mb-10">
+
+<h2 class="text-3xl font-bold text-green-700 mb-6">
+${editingAnimalId ? "Edit Animal" : "Add Animal"}
+</h2>
+
+<input id="animalName"
+placeholder="Animal Name"
+class="w-full border p-4 rounded-2xl mb-4"/>
+
+<input id="animalCategory"
+placeholder="Animal Category"
+class="w-full border p-4 rounded-2xl mb-4"/>
+
+<textarea id="animalBiodata"
+placeholder="Animal Biodata"
+class="w-full border p-4 rounded-2xl mb-4 h-32"></textarea>
+
+<input
+id="animalImage"
+type="file"
+accept="image/*"
+class="w-full border p-4 rounded-2xl mb-4 bg-white"
+/>
+
+<button onclick="saveAnimal()"
+class="bg-green-700 text-white px-8 py-4 rounded-2xl">
+
+${editingAnimalId ? "Update Animal" : "Add Animal"}
+
+</button>
+
+</div>
+
+` : ""}
+
+<!-- ANIMAL CONTAINER -->
+
+<div id="animalContainer"
+class="grid md:grid-cols-3 gap-8">
+
+</div>
+
+</main>
+
+</div>
+
+`;
+
+renderAnimals();
+
+}
+
+}
+
+// ================= RENDER ANIMALS =================
+
+function renderAnimals(filteredAnimals=animals){
+
+let animalCards="";
+
+filteredAnimals.forEach(animal=>{
+
+animalCards+=`
+
+<div
+onclick="openAnimalDetails(${animal.id})"
+class="bg-white rounded-3xl shadow-xl overflow-hidden cursor-pointer hover:scale-105 transition duration-300">
+
+<img
+src="${animal.image}"
+class="w-full h-56 object-cover"
+onerror="this.src='https://via.placeholder.com/400x250?text=Animal+Image'"
+/>
+
+<div class="p-5">
+
+<h3 class="text-2xl font-bold text-green-700">
+${animal.name}
+</h3>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+document.getElementById(
+"animalContainer"
+).innerHTML=animalCards;
+
+}
+
+// ================= OPEN DETAILS =================
+
+function openAnimalDetails(id){
+
+const animal=animals.find(a=>a.id===id);
+
+if(!animal) return;
+
+let commentsHTML="";
+
+if(animal.comments){
+
+animal.comments.forEach(comment=>{
+
+commentsHTML+=`
+
+<div class="bg-green-50 border border-green-200 rounded-2xl p-4 mb-3">
+${comment}
+</div>
+
+`;
+
+});
+
+}
+
+document.getElementById("animalContainer").innerHTML=`
+
+<div class="max-w-5xl mx-auto col-span-3">
+
+<button
+onclick="renderAnimals()"
+class="mb-6 bg-black text-white px-6 py-3 rounded-2xl">
+
+← Back
+
+</button>
+
+<div class="bg-white rounded-3xl overflow-hidden shadow-2xl">
+
+<img 
+src="${animal.image}" 
+class="w-full h-[400px] object-cover"
+onerror="this.src='https://via.placeholder.com/600x400?text=Animal+Image'"
+/>
+
+<div class="p-8">
+
+<div class="flex justify-between items-center mb-5">
+
+<h2 class="text-5xl font-bold text-green-700">
+${animal.name}
+</h2>
+
+${role==="owner" ? `
+
+<div class="flex gap-3">
+
+<button
+onclick="event.stopPropagation(); editAnimal(${animal.id})"
+class="bg-green-700 text-white px-5 py-3 rounded-2xl">
+
+Edit
+
+</button>
+
+<button
+onclick="event.stopPropagation(); deleteAnimal(${animal.id})"
+class="bg-red-600 text-white px-5 py-3 rounded-2xl">
+
+Delete
+
+</button>
+
+</div>
+
+` : ""}
+
+</div>
+
+<p class="text-2xl text-green-600 font-semibold mb-6">
+${animal.category}
+</p>
+
+<div class="bg-gray-100 p-6 rounded-3xl text-xl leading-9 mb-8">
+
+${animal.biodata}
+
+</div>
+
+<h3 class="text-3xl font-bold mb-5">
+Visitor Comments
+</h3>
+
+${commentsHTML || `
+<div class="text-gray-500 mb-5">
+No comments yet
+</div>
+`}
+
+<textarea
+id="comment-${animal.id}"
+placeholder="Write your comment..."
+class="w-full border p-5 rounded-2xl h-32 text-lg"></textarea>
+
+<button
+onclick="addComment(${animal.id}); openAnimalDetails(${animal.id})"
+class="mt-5 bg-green-700 text-white px-8 py-4 rounded-2xl text-lg">
+
+Submit Comment
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+// ================= SAVE ANIMAL =================
+
+function saveAnimal(){
+
+const name=document.getElementById("animalName").value.trim();
+
+const category=document.getElementById("animalCategory").value.trim();
+
+const biodata=document.getElementById("animalBiodata").value.trim();
+
+const imageInput=document.getElementById("animalImage");
+
+const imageFile=imageInput.files[0];
+
+if(!name || !category || !biodata){
+
+alert("Please fill all details");
+return;
+
+}
+
+if(editingAnimalId){
+
+const animalIndex=animals.findIndex(
+animal=>animal.id===editingAnimalId
+);
+
+if(animalIndex===-1){
+
+alert("Animal not found");
+return;
+
+}
+
+let currentImage=animals[animalIndex].image;
+
+if(imageFile){
+
+const reader=new FileReader();
+
+reader.onload=function(e){
+
+animals[animalIndex]={
+
+...animals[animalIndex],
+
+name:name,
+category:category,
+biodata:biodata,
+image:e.target.result
+
+};
+
+saveAnimals();
+
+editingAnimalId=null;
+
+renderAnimals();
+
+clearForm();
+
+alert("Animal updated successfully");
+
+};
+
+reader.readAsDataURL(imageFile);
+
+}else{
+
+animals[animalIndex]={
+
+...animals[animalIndex],
+
+name:name,
+category:category,
+biodata:biodata,
+image:currentImage
+
+};
+
+saveAnimals();
+
+editingAnimalId=null;
+
+renderAnimals();
+
+clearForm();
+
+alert("Animal updated successfully");
+
+}
+
+}else{
+
+if(!imageFile){
+
+alert("Please upload image");
+return;
+
+}
+
+const reader=new FileReader();
+
+reader.onload=function(e){
+
+animals.push({
+
+id:Date.now(),
+
+name:name,
+
+category:category,
+
+biodata:biodata,
+
+image:e.target.result,
+
+comments:[]
+
+});
+
+saveAnimals();
+
+renderAnimals();
+
+clearForm();
+
+alert("Animal added successfully");
+
+};
+
+reader.readAsDataURL(imageFile);
+
+}
+
+}
+
+// ================= EDIT =================
+
+function editAnimal(id){
+
+editingAnimalId=id;
+
+const animal=animals.find(a=>a.id===id);
+
+if(!animal){
+
+alert("Animal not found");
+return;
+
+}
+
+document.getElementById("animalName").value=animal.name;
+
+document.getElementById("animalCategory").value=animal.category;
+
+document.getElementById("animalBiodata").value=animal.biodata;
+
+document.getElementById("animalImage").value="";
+
+window.scrollTo({
+
+top:0,
+behavior:"smooth"
+
+});
+
+}
+
+// ================= DELETE =================
+
+function deleteAnimal(id){
+
+const confirmDelete=confirm(
+"Are you sure you want to delete this animal?"
+);
+
+if(!confirmDelete) return;
+
+animals=animals.filter(
+animal=>animal.id!==id
+);
+
+saveAnimals();
+
+renderAnimals();
+
+alert("Animal deleted successfully");
+
+}
+
+// ================= SEARCH =================
+
+function searchAnimal(value){
+
+const filteredAnimals=animals.filter(
+animal=>
+
+animal.name
+.toLowerCase()
+.includes(value.toLowerCase())
+
+);
+
+renderAnimals(filteredAnimals);
+
+}
+
+// ================= COMMENT =================
+
+function addComment(id){
+
+const text=document.getElementById(
+`comment-${id}`
+).value.trim();
+
+if(!text){
+
+alert("Please write comment");
+return;
+
+}
+
+const animal=animals.find(
+a=>a.id===id
+);
+
+if(!animal.comments){
+
+animal.comments=[];
+
+}
+
+animal.comments.push(text);
+
+saveAnimals();
+
+}
+
+// ================= PASSWORD =================
+
+function changePassword(){
+
+const oldPassword=document.getElementById("oldPassword").value;
+
+const newPassword=document.getElementById("newPassword").value;
+
+if(currentVisitor.password!==oldPassword){
+
+alert("Old password incorrect");
+return;
+
+}
+
+let users=JSON.parse(localStorage.getItem("users")) || [];
+
+users=users.map(user=>{
+
+if(user.username===currentVisitor.username){
+
+user.password=newPassword;
+currentVisitor.password=newPassword;
+
+}
+
+return user;
+
+});
+
+localStorage.setItem("users",JSON.stringify(users));
+
+alert("Password changed successfully");
+
+}
+
+// ================= VISITORS =================
+
+function getVisitorsHTML(){
+
+let users=JSON.parse(localStorage.getItem("users")) || [];
+
+let html="";
+
+users.forEach(user=>{
+
+html+=`
+
+<div class="border rounded-2xl p-4 mb-3 bg-gray-100">
+
+<p><b>Username:</b> ${user.username}</p>
+
+<p><b>Email:</b> ${user.email}</p>
+
+<p><b>Joined:</b> ${user.joinedAt}</p>
+
+</div>
+
+`;
+
+});
+
+return html;
+
+}
+
+// ================= CREATE ACCOUNT =================
+
+function createVisitorAccount(){
+
+const username=document.getElementById("signupUsername").value;
+
+const email=document.getElementById("signupEmail").value;
+
+const password=document.getElementById("signupPassword").value;
+
+const confirmPassword=document.getElementById("signupConfirmPassword").value;
+
+if(!username || !email || !password || !confirmPassword){
+
+alert("Please fill all fields");
+return;
+
+}
+
+if(password!==confirmPassword){
+
+alert("Passwords do not match");
+return;
+
+}
+
+let users=JSON.parse(localStorage.getItem("users")) || [];
+
+users.push({
+
+username,
+email,
+password,
+joinedAt:new Date().toLocaleString()
+
+});
+
+localStorage.setItem("users",JSON.stringify(users));
+
+alert("Account created successfully");
+
+page="login";
+
+render();
+
+}
+
+// ================= OWNER LOGIN =================
+
+function ownerLogin(){
+
+const user=document.getElementById("ownerUser").value;
+
+const pass=document.getElementById("ownerPass").value;
+
+if(user==="ManoharBishnoi" && pass==="Bishnoi5529"){
+
+role="owner";
+
+page="dashboard";
+
+render();
+
+}else{
+
+alert("Wrong owner login");
+
+}
+
+}
+
+// ================= VISITOR LOGIN =================
+
+function visitorLogin(){
+
+const username=document.getElementById("visitorUser").value;
+
+const password=document.getElementById("visitorPass").value;
+
+let users=JSON.parse(localStorage.getItem("users")) || [];
+
+const validUser=users.find(
+user=>user.username===username && user.password===password
+);
+
+if(validUser){
+
+currentVisitor=validUser;
+
+role="visitor";
+
+page="dashboard";
+
+render();
+
+}else{
+
+alert("Wrong username or password");
+
+}
+
+}
+
+// ================= MENU =================
+
+function toggleMenu(){
+
+menuOpen=!menuOpen;
+
+const menu=document.getElementById("menuBox");
+
+if(menuOpen){
+
+menu.classList.add("active");
+
+}else{
+
+menu.classList.remove("active");
+
+}
+
+}
+
+// ================= LOGOUT =================
+
+function logout(){
+
+role="";
+
+currentVisitor=null;
+
+page="home";
+
+render();
+
+}
+
+// ================= NAVIGATION =================
+
+function goHome(){
+
+page="home";
+
+render();
+
+}
+
+function goSignIn(){
+
+page="signin";
+
+render();
+
+}
+
+function goLogin(){
+
+page="login";
+
+render();
+
+}
+
+// ================= CLEAR FORM =================
+
+function clearForm(){
+
+document.getElementById("animalName").value="";
+
+document.getElementById("animalCategory").value="";
+
+document.getElementById("animalBiodata").value="";
+
+document.getElementById("animalImage").value="";
+
+}
+
+// ================= START =================
+
+render();
+
+</script>
+
+</body>
+</html>
